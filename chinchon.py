@@ -69,7 +69,7 @@ class Game:
 
     def LoadPreviousSession( self ):
 
-        print 'Loading previous session from %s...' % self.logfile
+        print 'Loading previous session from %s...' % self.logfilename
 
         for line in open(self.logfilename,'r'):
             self.NewGame(False)
