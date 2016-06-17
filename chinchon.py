@@ -1,8 +1,9 @@
 from ROOT import *
 
 class Game:
-    _colors  = [kBlack,kRed,kBlue,kOrange,kGreen,kPink+9,kViolet,kGray,kYellow,kMagenta]*100
-    _markers = range(20,25)
+    _colors         = [kBlack,kRed,kBlue,kOrange,kGreen,kPink+9,kViolet,kGray,kYellow,kMagenta]*100
+    _filled_markers = [20,21,22,29,33,34]
+    _empty_markers  = [24,25,26,30,27,28]
 
     def __init__( self, Nplayers, logfilename = 'chinchon.txt', max_score = 100 ):
         self.logfilename = logfilename
@@ -85,14 +86,14 @@ class Game:
     
         self.BuildGraphs()
         self.scores = [0] * self.Nplayers
-        self.hand   = 0
+        self.hand   = 1
         self.game  += 1
         self.logstr = ''
     
     def EndGame( self, write = True ):
-        for g in self.graphs:
+        for player,g in enumerate(self.graphs):
             g.SetLineStyle(2)
-            g.SetMarkerSize(0.5)
+            g.SetMarkerStyle(self._empty_markers[player])
         if write:
             self.logfile.write(self.logstr[:-1] + '\n')
 
@@ -106,7 +107,8 @@ class Game:
                 self.yupper = self.scores[player]
                 self.MG.SetMaximum(self.yupper)
             self.graphs[player].SetPoint( self.hand, self.hand, self.scores[player] )
-
+        
+        print 'Current scores:', self.scores
         self.hand += 1
     
         if self.hand > self.xupper:
@@ -124,10 +126,11 @@ class Game:
 
     def BuildGraph( self, player ):
         t = TGraph()
-        t.SetMarkerStyle(self._markers[player])
+        t.SetMarkerStyle(self._filled_markers[player])
         t.SetLineColor  (self._colors [self.game])
         t.SetMarkerColor(self._colors [self.game])
         t.SetLineStyle  (1)
+        t.SetPoint(0,0,0)
         return t
 
     def BuildGraphs( self ):
