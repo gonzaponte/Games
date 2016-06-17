@@ -67,9 +67,9 @@ class Game:
     def Finish( self ):
         self.logfile.close()
 
-    def LoadPreviousSession():
+    def LoadPreviousSession( self ):
 
-        print 'Loading previous session from %s...' % logfile
+        print 'Loading previous session from %s...' % self.logfile
 
         for line in open(self.logfilename,'r'):
             self.NewGame(False)
