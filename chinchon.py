@@ -56,7 +56,11 @@ class Game:
             input_str = raw_input('Introduce hand scores: ')
             if input_str == 'exit': break
             try:
-                self.AddHandScores(input_str)
+                scores, fix = self.ReadScores(input_str)
+                if fix:
+                    self.FixScore(scores)
+                else:
+                    self.AddHandScores(scores)
 
                 if self.HasGameEnded():
                     self.EndGame()
@@ -73,7 +77,8 @@ class Game:
 
         for line in open(self.logfilename,'r'):
             self.NewGame(False)
-            for scores in line.split(' '):
+            for scorestr in line.split(' '):
+                scores, fix = self.ReadScores(scorestr)
                 self.AddHandScores(scores)
             self.EndGame(False)
         self.logfileopt = 'a'
@@ -86,6 +91,7 @@ class Game:
     
         self.BuildGraphs()
         self.scores = [0] * self.Nplayers
+        self.lasts  = list(self.scores)
         self.hand   = 1
         self.game  += 1
         self.logstr = ''
@@ -98,7 +104,7 @@ class Game:
             self.logfile.write(self.logstr[:-1] + '\n')
 
     def AddHandScores( self, scores ):
-        for player, score in enumerate(self.ReadScores(scores)):
+        for player, score in enumerate(scores):
             self.scores[player] += score
             if self.scores[player] < self.ylower:
                 self.ylower = self.scores[player]
@@ -118,8 +124,16 @@ class Game:
         self.canvas.Modified();self.canvas.Update()
         self.logstr += scores + ' '
 
+    def FixScore( self, scores ):
+        self.hand -= 1
+        for player in range(self.Nplayers):
+            self.scores[player] -= self.lasts[player]
+        self.logstr = ' '.join(self.logstr.split(' ')[:-1]) + ' '
+        self.AddHandScores( scores )
+
     def ReadScores( self, Istr ):
-        return map( int, Istr.split(',') )
+        scores = map( int, Istr.split(',') )
+        return (scores[:-1], True) if len(scores) > self.Nplayers else (scores,False)
     
     def HasGameEnded( self ):
         return any(map( lambda x: x>self.max_score, self.scores ))
